@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quick Reader</title>
+    <style>
+* {
+  margin: 0;
+}
+
+#display {
+  margin: 0;
+  color: white;
+  background: black;
+  font-size: 96pt;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  padding: auto;
+  text-align: center;
+  vertical-align: middle;
+}
+    </style>
+  </head>
+  <body>
+    <div id="getInfo">
+      <textarea rows="20" cols="50" id="txt"></textarea>
+      <button onclick="beginWPS();">Begin</button>
+    </div>
+    <div id="display" hidden>
+    </div>
+    <script>
+var wordsPerMinute = 350;
+var words = [];
+var current_index = -1;
+var running = false;
+
+function beginWPS() {
+  document.getElementById("getInfo").hidden = true;
+  document.getElementById("display").hidden = false;
+
+  words = document.getElementById("txt").value.split("\n").join(" ").split(" ");
+  
+  running = true;
+  loop();
+}
+
+function loop() {
+  current_index++;
+  
+  if (current_index >= words.length) return;
+  displayCurrentWord();
+
+  window.setTimeout(loop, 1000/(wordsPerMinute/60));
+}
+
+function backUp() {
+  console.log('Backing up!');
+  if (!running)
+    return;
+
+  current_index -= Math.ceil(wordsPerMinute/60*5);
+  current_index = Math.max(current_index, 0)
+
+  displayCurrentWord();
+}
+
+function fastForward() {
+  console.log('Fast forwarding!');
+  if (!running)
+    return;
+  current_index += Math.ceil(wordsPerMinute*60*5);
+  current_index = Math.min(current_index, words.length);
+
+  displayCurrentWord();
+}
+
+function displayCurrentWord() {
+  let str = "Percent Done: " + Math.round(current_index/words.length * 100);
+  str += "%<br>Time Left: ";
+  let minutes = Math.floor((words.length-current_index)/wordsPerMinute);
+  let seconds = Math.round(((words.length-current_index)/wordsPerMinute - minutes)*60);
+  if (seconds < 10) seconds = "0" + seconds;
+  str += minutes + ":" + seconds + "<br><br>";
+  str += words[current_index];
+
+  document.getElementById("display").innerHTML = str;
+}
+
+window.onkeydown = e => {
+  if (e.key === 'ArrowLeft') {
+    backUp();
+  } else if (e.key === 'ArrowRight') {
+    fastForward();
+  }
+};
+    </script>
+  </body>
+</html>
