@@ -19,14 +19,39 @@
   text-align: center;
   vertical-align: middle;
 }
+
+.no-display {
+  display: none !important;
+}
+
+textarea {
+  width: 100%;
+}
+
+.centered-obj-container {
+  width: 100%;
+}
+
+.centered-obj-container > * {
+  width: 50%;
+  margin-left: 25%;
+  font-size: 18pt;
+  display: block;
+}
     </style>
   </head>
   <body>
     <div id="getInfo">
-      <textarea rows="20" cols="50" id="txt"></textarea>
-      <button onclick="beginWPS();">Begin</button>
+      <textarea rows="20" cols="50" id="txt" placeholder="Copy-paste text to read here!"></textarea>
+      <div class="centered-obj-container">
+        <p id="wpm-desc">350 Words Per Minute</p>
+        <input type="range" min="50" max="500" class="slider" id="wpm" value="350" oninput="updateWPM();">
+      </div>
+      <div class="centered-obj-container">
+        <button onclick="beginWPM();">Begin</button>
+      </div>
     </div>
-    <div id="display" hidden>
+    <div id="display" class="no-display">
     </div>
     <script>
 var wordsPerMinute = 350;
@@ -34,27 +59,47 @@ var words = [];
 var current_index = -1;
 var running = false;
 
-function beginWPS() {
-  document.getElementById("getInfo").hidden = true;
-  document.getElementById("display").hidden = false;
+function updateWPM() {
+  wordsPerMinute = parseInt(document.getElementById("wpm").value);
+  document.getElementById("wpm-desc").innerText = `${wordsPerMinute} Words Per Minute`;
+}
+
+function beginWPM() {
+  document.getElementById("getInfo").classList.add("no-display");
+  document.getElementById("display").classList.remove("no-display");
 
   words = document.getElementById("txt").value.split("\n").join(" ").split(" ");
   
   running = true;
-  loop();
+
+  let str = `Random stats go here.<br>
+              Arrow keys skip.<br>
+              <br>
+              Words here.`
+  document.getElementById("display").innerHTML = str;
+
+  window.setTimeout(loop, 5000);
 }
 
 function loop() {
   current_index++;
   
-  if (current_index >= words.length) return;
+  if (current_index >= words.length) {
+    complete();
+    return;
+  }
+
   displayCurrentWord();
 
   window.setTimeout(loop, 1000/(wordsPerMinute/60));
 }
 
+function complete() {
+  document.getElementById("display").innerText = "\nComplete! Refresh the page to restart!";
+}
+
 function backUp() {
-  console.log('Backing up!');
+  console.log("Backing up!");
   if (!running)
     return;
 
@@ -65,7 +110,7 @@ function backUp() {
 }
 
 function fastForward() {
-  console.log('Fast forwarding!');
+  console.log("Fast forwarding!");
   if (!running)
     return;
   current_index += Math.ceil(wordsPerMinute*60*5);
@@ -87,9 +132,9 @@ function displayCurrentWord() {
 }
 
 window.onkeydown = e => {
-  if (e.key === 'ArrowLeft') {
+  if (e.key === "ArrowLeft") {
     backUp();
-  } else if (e.key === 'ArrowRight') {
+  } else if (e.key === "ArrowRight") {
     fastForward();
   }
 };
